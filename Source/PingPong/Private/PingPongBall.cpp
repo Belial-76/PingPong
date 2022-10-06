@@ -135,7 +135,7 @@ void APingPongBall::Destroyed()
 {
 	Super::Destroyed();
 
-	MoveSpeed -= Points * 10;
+	MoveSpeed -= (Points - 1) * 10;
 	Points = 1;
 	Destroy();
 }

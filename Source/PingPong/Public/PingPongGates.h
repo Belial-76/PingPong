@@ -7,6 +7,7 @@
 #include "PingPongGates.generated.h"
 
 class UBoxComponent;
+class APingPongPlayerPawn;
 
 UCLASS()
 class PINGPONG_API APingPongGates : public AActor
@@ -36,5 +37,8 @@ public:
 
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor, UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintCallable)
+	int GetPoints() { return Points; }
 
 };

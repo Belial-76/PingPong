@@ -4,6 +4,7 @@
 #include "PingPongGates.h"
 
 #include "PingPongBall.h"
+#include "PingPongPlayerPawn.h"
 #include "Components/BoxComponent.h"
 
 APingPongGates::APingPongGates()
@@ -38,7 +39,7 @@ void APingPongGates::OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AAc
 {
 	if (APingPongBall* Ball = Cast<APingPongBall>(Actor))
 	{
-		Points += Ball->Points;
+		Points = Ball->Points;
 		Ball->Destroyed();
 	}
 }
