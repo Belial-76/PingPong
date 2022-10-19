@@ -7,9 +7,12 @@
 #include "PingPongPlayerController.h"
 #include "Widget_Expectation.h"
 #include "Components/SphereComponent.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystem.h"
 #include "PingPong/PingPongGameModeBase.h"
 
 APingPongBall::APingPongBall()
@@ -19,9 +22,9 @@ APingPongBall::APingPongBall()
 	BodyCollision = CreateDefaultSubobject<USphereComponent>(TEXT("Ball Body Collider"));
 	SetRootComponent(BodyCollision);
 
-	BodyMash = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Ball Body Mesh"));
-	BodyMash->SetupAttachment(RootComponent);
-	BodyMash->SetIsReplicated(true);
+	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Ball Body Mesh"));
+	BodyMesh->SetupAttachment(RootComponent);
+	BodyMesh->SetIsReplicated(true);
 
 	SetReplicates(true);
 	SetReplicateMovement(true);
@@ -30,7 +33,9 @@ APingPongBall::APingPongBall()
 void APingPongBall::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	BodyMesh->SetStaticMesh(LoadBodyMesh());
+	BodyMesh->SetMaterial(0, LoadMaterial());
 }
 
 void APingPongBall::Server_StartMove_Implementation()
@@ -98,13 +103,46 @@ bool APingPongBall::Server_StopMove_Validate()
 void APingPongBall::Multicast_HitEffect_Implementation()
 {
 	UWorld* World = GetWorld();
-	if (World && HitEffect)
+	if (World && LoadHitEffect())
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LoadHitEffect(), GetActorLocation());
 
 		Points++;
 		MoveSpeed += 10;
 	}
+}
+
+UStaticMesh* APingPongBall::LoadBodyMesh()
+{
+	if (BodyMeshRef.IsPending())
+	{
+		const FSoftObjectPath& AssetRef = BodyMeshRef.ToStringReference();
+
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		BodyMeshRef = Cast<UStaticMesh>(StreamableManager.LoadSynchronous(AssetRef));
+	}
+
+	return BodyMeshRef.Get();
+}
+
+UMaterial* APingPongBall::LoadMaterial()
+{
+	if (MaterialRef.IsPending())
+	{
+		const FSoftObjectPath& AssetRef = MaterialRef.ToStringReference();
+
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		MaterialRef = Cast<UMaterial>(StreamableManager.LoadSynchronous(AssetRef));
+	}
+
+	return MaterialRef.Get();
+}
+
+UParticleSystem* APingPongBall::LoadHitEffect()
+{
+	UParticleSystem* HitEffect = LoadObject<UParticleSystem>(NULL, TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion"), NULL, LOAD_None, NULL);
+
+	return HitEffect;
 }
 
 void APingPongBall::Tick(float DeltaTime)

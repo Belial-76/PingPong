@@ -21,8 +21,7 @@ protected:
 	UStaticMeshComponent* LBodyMesh;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* RBodyMesh;
-
-public:
+	
 	UPROPERTY()
 	int Points = 0;
 
@@ -35,7 +34,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
+	UFUNCTION(NetMulticast, Unreliable)
 	void OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor, UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult);
 
 	UFUNCTION(BlueprintCallable)

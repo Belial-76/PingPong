@@ -14,12 +14,16 @@ APingPongGates::APingPongGates()
 	BodyCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Gates Body Collision"));
 	SetRootComponent(BodyCollision);
 	BodyCollision->OnComponentBeginOverlap.AddDynamic(this, &APingPongGates::OnBeginOverlap);
+	BodyCollision->SetIsReplicated(true);
 
 	LBodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Left Body Mesh"));
 	LBodyMesh->SetupAttachment(RootComponent);
 
 	RBodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Right Body Mesh"));
 	RBodyMesh->SetupAttachment(RootComponent);
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 void APingPongGates::BeginPlay()
@@ -34,12 +38,12 @@ void APingPongGates::Tick(float DeltaTime)
 
 }
 
-void APingPongGates::OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor,
-	UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult)
+void APingPongGates::OnBeginOverlap_Implementation(UPrimitiveComponent* PrimitiveComponent, AActor* Actor,
+                                                   UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult)
 {
 	if (APingPongBall* Ball = Cast<APingPongBall>(Actor))
 	{
-		Points = Ball->Points;
+		Points = Ball->GetPoints();
 		Ball->Destroyed();
 	}
 }

@@ -18,18 +18,21 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	USphereComponent* BodyCollision;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	UStaticMeshComponent* BodyMash;
+	UStaticMeshComponent* BodyMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
 	float MoveSpeed = 110;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
-	UParticleSystem* HitEffect;
 
 	UPROPERTY(Replicated)
 	bool IsMoving = true;
 
-public:
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftObjectPtr<UStaticMesh> BodyMeshRef;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftObjectPtr<UMaterial> MaterialRef;
+	
+	UPROPERTY(Replicated)
 	int Points = 1;
 
 public:	
@@ -50,6 +53,10 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_HitEffect();
 
+	UStaticMesh* LoadBodyMesh();
+	UMaterial* LoadMaterial();
+	UParticleSystem* LoadHitEffect();
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -63,4 +70,5 @@ public:
 
 	virtual void Destroyed() override;
 
+	int GetPoints() { return Points; }
 };
