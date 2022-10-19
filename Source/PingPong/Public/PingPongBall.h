@@ -7,6 +7,7 @@
 #include "PingPongBall.generated.h"
 
 class USphereComponent;
+class UWidget_Expectation;
 
 UCLASS()
 class PINGPONG_API APingPongBall : public AActor

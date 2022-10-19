@@ -5,6 +5,7 @@
 
 #include "PingPongPlayerController.h"
 #include "PingPongPlayerPawn.h"
+#include "Widget_Expectation.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -17,6 +18,7 @@ APingPongGameModeBase::APingPongGameModeBase()
 void APingPongGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
 
 void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -46,6 +48,12 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 		CurrPlayer = Player1;
 		StartPos = Player1Start;
 		UE_LOG(LogTemp, Warning, TEXT("PingPongGameMode: Init Player 1"));
+
+		Player1->Widget();
+		if (!Player1->GetWidget()->IsVisible())
+		{
+			Player1->GetWidget()->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	else if (Player2 == NULL)
 	{
@@ -53,6 +61,11 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 		CurrPlayer = Player2;
 		StartPos = Player2Start;
 		UE_LOG(LogTemp, Warning, TEXT("PingPongGameMode: Init Player 2"));
+
+		if (Player1->GetWidget()->IsVisible())
+		{
+			Player1->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 	else
 	{

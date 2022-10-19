@@ -4,10 +4,13 @@
 #include "PingPongBall.h"
 
 #include "DrawDebugHelpers.h"
+#include "PingPongPlayerController.h"
+#include "Widget_Expectation.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "PingPong/PingPongGameModeBase.h"
 
 APingPongBall::APingPongBall()
 {
@@ -110,7 +113,10 @@ void APingPongBall::Tick(float DeltaTime)
 
 	if (GetNetMode() != ENetMode::NM_Client)
 	{
-		Server_Move(DeltaTime);
+		if (GetWorld()->GetAuthGameMode<APingPongGameModeBase>()->GetPlayer2() != NULL)
+		{
+			Server_Move(DeltaTime);
+		}
 	}
 }
 

@@ -30,4 +30,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	APingPongPlayerController* GetPlayer1() { return Player1; }
+	APingPongPlayerController* GetPlayer2() { return Player2; }
 };

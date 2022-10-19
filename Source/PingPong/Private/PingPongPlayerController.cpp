@@ -4,6 +4,7 @@
 #include "PingPongPlayerController.h"
 
 #include "PingPongPlatform.h"
+#include "Widget_Expectation.h"
 
 APingPongPlayerController::APingPongPlayerController()
 {
@@ -20,6 +21,12 @@ void APingPongPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAxis("Move", this, &APingPongPlayerController::MoveRight);
+}
+
+void APingPongPlayerController::Widget()
+{
+	ExpectationWidget = CreateWidget<UWidget_Expectation>(this, ExpectationWidgetClass);
+	ExpectationWidget->AddToViewport();
 }
 
 void APingPongPlayerController::MoveRight(float AxisValue)

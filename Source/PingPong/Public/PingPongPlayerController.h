@@ -7,6 +7,7 @@
 #include "PingPongPlayerController.generated.h"
 
 class APingPongPlatform;
+class UWidget_Expectation;
 
 UCLASS()
 class PINGPONG_API APingPongPlayerController : public APlayerController
@@ -23,6 +24,11 @@ protected:
 	UPROPERTY()
 	APingPongPlatform* Platform;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UWidget_Expectation> ExpectationWidgetClass;
+	UPROPERTY()
+	UWidget_Expectation* ExpectationWidget;
+
 public:
 	APingPongPlayerController();
 
@@ -36,6 +42,9 @@ public:
 	void SpawnPlatform(TSubclassOf<APingPongPlatform> SpawnPlatformClass);
 
 	virtual void SetupInputComponent() override;
+
+	void Widget();
+	UWidget_Expectation* GetWidget() { return ExpectationWidget; }
 
 protected:
 	UFUNCTION()
