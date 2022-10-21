@@ -4,6 +4,7 @@
 #include "PingPongPlatform.h"
 
 #include "Components/BoxComponent.h"
+#include "Engine/AssetManager.h"
 
 APingPongPlatform::APingPongPlatform()
 {
@@ -23,7 +24,28 @@ APingPongPlatform::APingPongPlatform()
 void APingPongPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	LoadBodyMesh();
+}
+
+void APingPongPlatform::LoadBodyMesh()
+{
+	FStreamableDelegate LoadMeshDelegate;
+	LoadMeshDelegate.BindUObject(this, &APingPongPlatform::OnBodyMeshLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	AssetHandle = StreamableManager.RequestAsyncLoad(BodyMeshRef.ToStringReference(), LoadMeshDelegate);
+}
+
+void APingPongPlatform::OnBodyMeshLoaded()
+{
+	UStaticMesh* LoadedMesh = Cast<UStaticMesh>(AssetHandle.Get()->GetLoadedAsset());
+	if (LoadedMesh)
+	{
+		BodyMesh->SetStaticMesh(LoadedMesh);
+	}
 }
 
 void APingPongPlatform::Tick(float DeltaTime)

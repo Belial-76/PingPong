@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "PingPongBall.generated.h"
 
@@ -23,14 +24,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
 	float MoveSpeed = 110;
 
+	UParticleSystem* HitEffect;
+
 	UPROPERTY(Replicated)
 	bool IsMoving = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSoftObjectPtr<UStaticMesh> BodyMeshRef;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSoftObjectPtr<UMaterial> MaterialRef;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftObjectPtr<UParticleSystem> HitEffectRef;
+
+	TSharedPtr<FStreamableHandle> AssetHandleMesh;
+	TSharedPtr<FStreamableHandle> AssetHandleEffect;
 	
 	UPROPERTY(Replicated)
 	int Points = 1;
@@ -53,9 +60,14 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_HitEffect();
 
-	UStaticMesh* LoadBodyMesh();
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void LoadBodyMesh(); //UStaticMesh*
+	void OnBodyMeshLoaded();
+
 	UMaterial* LoadMaterial();
-	UParticleSystem* LoadHitEffect();
+
+	void LoadHitEffect(); //UParticleSystem*
+	void OnHitEffectLoaded();
 
 public:	
 	virtual void Tick(float DeltaTime) override;

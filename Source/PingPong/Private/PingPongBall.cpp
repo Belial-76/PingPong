@@ -8,6 +8,7 @@
 #include "Widget_Expectation.h"
 #include "Components/SphereComponent.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StaticMeshSocket.h"
 #include "Engine/StreamableManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -34,7 +35,10 @@ void APingPongBall::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BodyMesh->SetStaticMesh(LoadBodyMesh());
+	//BodyMesh->SetStaticMesh(LoadBodyMesh());
+	LoadBodyMesh();
+	LoadHitEffect();
+
 	BodyMesh->SetMaterial(0, LoadMaterial());
 }
 
@@ -103,18 +107,18 @@ bool APingPongBall::Server_StopMove_Validate()
 void APingPongBall::Multicast_HitEffect_Implementation()
 {
 	UWorld* World = GetWorld();
-	if (World && LoadHitEffect())
+	if (World && HitEffect)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LoadHitEffect(), GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorLocation());
 
 		Points++;
 		MoveSpeed += 10;
 	}
 }
 
-UStaticMesh* APingPongBall::LoadBodyMesh()
+void APingPongBall::LoadBodyMesh()
 {
-	if (BodyMeshRef.IsPending())
+	/*if (BodyMeshRef.IsPending())
 	{
 		const FSoftObjectPath& AssetRef = BodyMeshRef.ToStringReference();
 
@@ -122,7 +126,24 @@ UStaticMesh* APingPongBall::LoadBodyMesh()
 		BodyMeshRef = Cast<UStaticMesh>(StreamableManager.LoadSynchronous(AssetRef));
 	}
 
-	return BodyMeshRef.Get();
+	return BodyMeshRef.Get();*/
+
+	FStreamableDelegate LoadMeshDelegate;
+	LoadMeshDelegate.BindUObject(this, &APingPongBall::OnBodyMeshLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	AssetHandleMesh = StreamableManager.RequestAsyncLoad(BodyMeshRef.ToStringReference(), LoadMeshDelegate);
+}
+
+void APingPongBall::OnBodyMeshLoaded()
+{
+	UStaticMesh* LoadedMesh = Cast<UStaticMesh>(AssetHandleMesh.Get()->GetLoadedAsset());
+	if (LoadedMesh)
+	{
+		BodyMesh->SetStaticMesh(LoadedMesh);
+	}
 }
 
 UMaterial* APingPongBall::LoadMaterial()
@@ -138,11 +159,28 @@ UMaterial* APingPongBall::LoadMaterial()
 	return MaterialRef.Get();
 }
 
-UParticleSystem* APingPongBall::LoadHitEffect()
+void APingPongBall::LoadHitEffect()
 {
-	UParticleSystem* HitEffect = LoadObject<UParticleSystem>(NULL, TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion"), NULL, LOAD_None, NULL);
+	/*UParticleSystem* HitEffect = LoadObject<UParticleSystem>(NULL, TEXT("/Game/StarterContent/Particles/P_Explosion.P_Explosion"), NULL, LOAD_None, NULL);
 
-	return HitEffect;
+	return HitEffect;*/
+
+	FStreamableDelegate LoadEffectDelegate;
+	LoadEffectDelegate.BindUObject(this, &APingPongBall::OnHitEffectLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	AssetHandleEffect = StreamableManager.RequestAsyncLoad(HitEffectRef.ToStringReference(), LoadEffectDelegate);
+}
+
+void APingPongBall::OnHitEffectLoaded()
+{
+	UParticleSystem* LoadedEffect = Cast<UParticleSystem>(AssetHandleEffect.Get()->GetLoadedAsset());
+	if (LoadedEffect)
+	{
+		HitEffect = LoadedEffect;
+	}
 }
 
 void APingPongBall::Tick(float DeltaTime)

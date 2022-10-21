@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "PingPongPlatform.generated.h"
 
@@ -19,6 +20,11 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* BodyMesh;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftObjectPtr<UStaticMesh> BodyMeshRef;
+
+	TSharedPtr<FStreamableHandle> AssetHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed = 100;
 
@@ -27,6 +33,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void LoadBodyMesh();
+
+	void OnBodyMeshLoaded();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
